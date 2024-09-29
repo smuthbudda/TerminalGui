@@ -1,3 +1,4 @@
+use crate::database::DataConnection;
 use crossterm::event;
 use crossterm::event::{KeyCode, KeyEventKind};
 use ratatui::buffer::Buffer;
@@ -9,15 +10,23 @@ use ratatui::widgets::{Block, Paragraph};
 use ratatui::{DefaultTerminal, Frame};
 use std::{fs, io};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct AppData {
     mode: Mode,
     files: Vec<FileData>,
     first_load: bool,
+    data_connection: DataConnection,
 }
 
 impl AppData {
-    /// Initialises the UIS
+    pub fn new() -> AppData {
+        AppData {
+            mode: Mode::Running,
+            first_load: false,
+            files: vec![],
+            data_connection: DataConnection::new(),
+        }
+    }
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while self.is_running() {
             terminal.draw(|frame| {
@@ -94,15 +103,14 @@ impl Widget for &AppData {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 enum Mode {
-    #[default]
     Running,
     Destroy,
     Quit,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct FileData {
     name: String,
     file_path: String,
